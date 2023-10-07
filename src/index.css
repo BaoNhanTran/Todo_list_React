@@ -11,3 +11,29 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* My additional */
+
+/* .todo-item {
+  width: 400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.done {
+  margin-right: 10px;
+}
+
+.delete {
+  margin-left: auto;
+}
+
+.completed .todo-title {
+  color: #ccc;
+  text-decoration: line-through;
+}
+
+.todo-title {
+  line-height: 21px;
+} */
