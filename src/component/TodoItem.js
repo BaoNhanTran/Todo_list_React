@@ -12,7 +12,7 @@ function TodoItem({ todo, index, handle, editIndex }) {
                 />
                 <label
                     className="todo-label"
-                    title="Double click to edit task!"
+                    title={todo.completed ? "Completed task can't be edited" : "Double click to edit task!"}
                     onDoubleClick={() => handle.startEdit(index)}
                 >
                     <span className="todo-text">
