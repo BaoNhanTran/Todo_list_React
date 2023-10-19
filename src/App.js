@@ -15,6 +15,7 @@ import Footer from "./component/Footer";
 
 // utilities
 import initState from './util/initState.js'
+import logger from './util/logger'
 
 // Main
 
@@ -90,7 +91,7 @@ function App() {
 
     // Hook
 
-    const [state, dispatch] = useReducer(reducer, initState)
+    const [state, dispatch] = useReducer(logger(reducer), initState)
 
     const { todo, todos, editIndex, isEnterOrEscpressed, filter, filters } = state
 

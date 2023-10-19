@@ -5,9 +5,7 @@ import action from './actions'
 const { SET_TODO, ADD_TODO, DELETE_TODO, COMPLETED, TOGGLE_ALL, SET_EDIT_INDEX, EDIT_TODO, SET_IS_ENTER_OR_ESC_PRESSED, SET_FILTER, CLEAR_COMPLETED } = action
 
 const reducer = (state, action) => {
-    console.group(action.type);
     const { todo, todos, editIndex, filters } = state
-    console.log('Prev state:', state);
     let newState
     switch (action.type) {
         case SET_TODO: {
@@ -110,8 +108,6 @@ const reducer = (state, action) => {
             throw new Error('Invalid action')
         }
     }
-    console.log('New state:', newState);
-    console.groupEnd()
     return newState
 }
 
