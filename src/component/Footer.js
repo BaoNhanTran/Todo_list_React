@@ -1,4 +1,7 @@
-function Footer({ todos, filters, filter, setFilter, handle }) {
+import action from "../actions"
+const { setFilter, clearCompleted } = action
+
+function Footer({ todos, filters, filter, dispatch }) {
     return (
         <footer className="footer">
             {/* <!-- This should be `0 items left` by default --> */}
@@ -10,7 +13,7 @@ function Footer({ todos, filters, filter, setFilter, handle }) {
                         <a
                             className={filter === item ? "selected" : ""}
                             href="#/"
-                            onClick={() => setFilter(item)}
+                            onClick={() => dispatch(setFilter(item))}
                         >
                             {item[0].toUpperCase() + item.slice(1)}
                         </a>
@@ -21,7 +24,7 @@ function Footer({ todos, filters, filter, setFilter, handle }) {
             {todos.some(filters.completed) ? (
                 <button
                     className="clear-completed"
-                    onClick={handle.clearCompleted}
+                    onClick={() => dispatch(clearCompleted())}
                 >
                     Clear completed
                 </button>

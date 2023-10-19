@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useReducer } from "react";
 
 // CSS
 import './css/base.css'
 import './css/style.css'
+
+// Core
+import reducer from './reducer.js'
+import action from './actions.js'
 
 // Component
 import Header from './component/Header.js'
@@ -10,193 +14,113 @@ import TodoList from './component/TodoList.js'
 import Footer from "./component/Footer";
 
 // utilities
-import date from './util/date.js'
-import storage from './util/storage.js'
-
-// Set initial todos
-const init = [
-    {
-        title: 'Learn HTML, CSS',
-        completed: true,
-        date: "02/09/2023"
-    },
-    {
-        title: 'Learn Javascript',
-        completed: true,
-        date: "12/09/2023"
-    },
-    {
-        title: 'Learn ReactJs',
-        completed: false,
-        date: "06/10/2023"
-    },
-    {
-        title: 'Cho người ta một phần mềm, bạn sẽ làm họ bực mình một ngày. Dạy người ta lập trình, họ sẽ bực mình cả đời!',
-        completed: false,
-        date: "06/10/2023"
-    },
-]
-
-storage.get() || storage.set(init)
+import initState from './util/initState.js'
 
 // Main
 
-const filters = {
-    all: () => true,
-    active: todo => !todo.completed,
-    completed: todo => todo.completed
-}
+const { setTodo, addTodo, setEditIndex, editTodo, deleteTodo, setIsEnterOrEscpressed } = action
 
 function App() {
 
     // Handler functions
     const handle = {
-        input(e) {
-            setTask(e.target.value);
-        },
         add(e) {
-            const newTitle = task.trim()
+            const newTitle = todo.trim()
             if (e.keyCode === 13 && newTitle !== '') {
                 if (todos.some(todo => todo.title === newTitle)) {
                     alert('This task has already been added!')
-                    setTask(newTitle)
                 } else {
-                    setTodos(prev => {
-                        const next = [...prev, {
-                            title: newTitle,
-                            completed: false,
-                            date,
-                        }]
-
-                        // Save to local storage
-                        storage.set(next)
-                        return next;
-                    })
-                    setTask('')
+                    dispatch(addTodo())
                 }
             }
         },
-        delete(todo) {
-            setTodos(prev => {
-                const next = prev.filter(item => item !== todo)
-                storage.set(next)
-                return next
-            })
-        },
-        complete(index) {
-            const newTodos = [...todos]
-            newTodos[index].completed = !newTodos[index].completed
-            storage.set(newTodos)
-            setTodos(newTodos)
-        },
-        toggleAll() {
-            const checked = todos.every(todo => todo.completed === true)
-            const newTodos = todos.map(todo => ({
-                ...todo,
-                completed: !checked
-            }))
-            storage.set(newTodos)
-            setTodos(newTodos)
-        },
         startEdit(index) {
-            setEditIndex(index)
+            if (!todos[index].completed) {
+                dispatch(setEditIndex(index))
+                dispatch(setIsEnterOrEscpressed(false))
+            }
             setTimeout(() => {
+                // dùng ref trong trường hợp này chỉ lấy được input cuối cùng nên không đạt được mục đích
                 const input = document.querySelectorAll('.edit')[index]
                 const end = input.value.length
                 input.focus()
                 input.setSelectionRange(end, end)
             }, 0);
         },
-        edit(e, todo, index) {
+        edit(e) {
             const newTitle = e.target.value.trim();
-            const endEdit = (todo, index) => {
+            const endEdit = () => {
                 if (newTitle !== '') {
-                    /* Xử lý khi người dùng sửa tên task, nhưng tên mới đã tồn tại trong todo list: 
+                    /* Option warning: Xử lý khi người dùng sửa tên task, nhưng tên mới đã tồn tại trong todo list: 
                     Đảm bảo rằng trong todo list không có 2 task trùng tên nhau */
-                    if (todos.some((todo, index) => todo.title === newTitle && editIndex !== index && editIndex !== null)) {
+                    if (todos.some((task, index) => task.title === newTitle && editIndex !== index && editIndex !== null)) {
                         alert('This task has already been added! Please choose another task.')
                     } else {
-                        const newTodos = [...todos]
-                        newTodos[index].title = newTitle
-                        storage.set(newTodos)
-                        setTodos(newTodos)
-                        setEditIndex(null)
+                        dispatch(editTodo(newTitle))
+                        dispatch(setEditIndex(null))
                     }
                 } else {
-                    this.delete(todo)
-                    setEditIndex(null)
+                    dispatch(deleteTodo(editIndex))
+                    dispatch(setEditIndex(null))
                 }
             }
-            
+
             switch (e.keyCode) {
                 case 13:
-                    endEdit(todo, index)
+                    endEdit()
                     //Đổi biến isEnterOrEscPressed sang true khi người dùng nhấn phím enter hoặc esc
-                    setIsEnterOrEscpressed(true)
+                    dispatch(setIsEnterOrEscpressed(true))
                     break
                 case undefined:
                     // Duyệt biến isEnterOrEscPressed === false mới kích hoạt onBlur
                     if (!isEnterOrEscpressed) {
-                        endEdit(todo, index)
+                        endEdit()
                     }
                     // Đổi biến isEnterOrEscPressed sang false sau khi onBlur được kích hoạt
-                    setIsEnterOrEscpressed(false)
+                    dispatch(setIsEnterOrEscpressed(false))
+
                     break
                 case 27:
-                    setEditIndex(null)
+                    dispatch(setEditIndex(null))
                     //Đổi biến isEnterOrEscPressed sang true khi người dùng nhấn phím enter hoặc esc
-                    setIsEnterOrEscpressed(true)
+                    dispatch(setIsEnterOrEscpressed(true))
             }
-        },
-        clearCompleted() {
-            setTodos(prev => {
-                const next = prev.filter(filters.active)
-                storage.set(next)
-                return next
-            })
         }
     }
 
     // Hook
 
-    const [task, setTask] = useState('')
+    const [state, dispatch] = useReducer(reducer, initState)
 
-    const [todos, setTodos] = useState(() => storage.get() ?? [])
-
-    const [filter, setFilter] = useState('all')
-
-    const [editIndex, setEditIndex] = useState(null)
-
-    // Tạo ra biến này để ngăn chặn việc gọi sự kiện onBlur sau khi người dùng nhấn enter hoặc esc
-    const [isEnterOrEscpressed, setIsEnterOrEscpressed] = useState(false)
+    const { todo, todos, editIndex, isEnterOrEscpressed, filter, filters } = state
 
     // JSX
 
     return (
         <section className="todoapp">
             <Header
-                onChange={handle.input}
-                value={task}
+                onChange={e => dispatch(setTodo(e.target.value))}
+                value={todo}
                 onKeyUp={handle.add}
             />
             {/* <!-- This section should be hidden by default and shown when there are todos --> */}
             {todos.length > 0 &&
                 <TodoList
                     todos={todos}
-                    handle={handle}
                     filters={filters}
                     filter={filter}
                     editIndex={editIndex}
+                    handle={handle}
+                    dispatch={dispatch}
                 />
             }
             {/* <!-- This footer should hidden by default and shown when there are todos --> */}
             {todos.length > 0 &&
                 <Footer
                     todos={todos}
-                    handle={handle}
                     filters={filters}
                     filter={filter}
-                    setFilter={setFilter}
+                    dispatch={dispatch}
                 />
             }
         </section>

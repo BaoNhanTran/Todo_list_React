@@ -1,28 +1,30 @@
 import TodoItem from './TodoItem.js'
+import action from '../actions.js'
+const { toggleAll } = action
 
-function TodoList({ todos, handle, filters, filter, editIndex }) {
+function TodoList({ todos, filters, filter, dispatch, ...props }) {
     return (
         <section className="main">
             <input
-                checked={todos.every(todo => todo.completed === true)}
+                checked={todos.every(task => task.completed === true)}
                 id="toggle-all"
                 className="toggle-all"
                 type="checkbox"
-                onChange={handle.toggleAll}
+                onChange={() => dispatch(toggleAll())}
             />
             <label htmlFor="toggle-all">Mark all as complete</label>
             <ul className="todo-list">
                 {/* <!-- These are here just to show the structure of the list items --> */}
                 {/* <!-- List items should get the class `editing` when editing and `completed` when marked as completed --> */}
-                {todos.map((todo, index) => {
-                    if (filters[filter](todo)) {
+                {todos.map((task, index) => {
+                    if (filters[filter](task)) {
                         return (
                             < TodoItem
                                 key={index}
-                                todo={todo}
+                                task={task}
                                 index={index}
-                                handle={handle}
-                                editIndex={editIndex}
+                                dispatch={dispatch}
+                                {...props}
                             />
                         )
                     }

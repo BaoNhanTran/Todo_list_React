@@ -1,43 +1,46 @@
-function TodoItem({ todo, index, handle, editIndex }) {
+import action from "../actions"
+const { deleteTodo, completed } = action
+
+function TodoItem({ task, index, handle, editIndex, dispatch }) {
     return (
         <li
-            className={todo.completed ? "completed" : "" + (editIndex === index ? "editing" : "")}
+            className={`${task.completed ? "completed" : ""} ${editIndex === index ? "editing" : ""}`}
         >
             <div className="view">
                 <input
                     className="toggle"
-                    checked={todo.completed}
-                    onChange={() => handle.complete(index)}
+                    checked={task.completed}
+                    onChange={() => dispatch(completed(index))}
                     type="checkbox"
                 />
                 <label
                     className="todo-label"
-                    title={todo.completed ? "Completed task can't be edited" : "Double click to edit task!"}
+                    title={task.completed ? "Completed task can't be edited!" : "Double click to edit task!"}
                     onDoubleClick={() => handle.startEdit(index)}
                 >
                     <span className="todo-text">
-                        {todo.title}
+                        {task.title}
                     </span>
                     <span className="date">
-                        {todo.date}
+                        {task.date}
                     </span>
                 </label>
-                <button className="destroy" onClick={() => handle.delete(todo)}></button>
+                <button className="destroy" onClick={() => dispatch(deleteTodo(index))}></button>
             </div>
-            {todo.title.length <= 43 ? (
+            {task.title.length <= 43 ? (
                 <input
                     className="edit"
-                    onKeyUp={e => handle.edit(e, todo, index)}
-                    onBlur={e => handle.edit(e, todo, index)}
-                    defaultValue={todo.title}
+                    onKeyUp={e => handle.edit(e)}
+                    onBlur={e => handle.edit(e)}
+                    defaultValue={task.title}
                 />
             )
                 : (
                     <textarea
                         className="edit"
-                        onKeyUp={e => handle.edit(e, todo, index)}
-                        onBlur={e => handle.edit(e, todo, index)}
-                        defaultValue={todo.title}
+                        onKeyUp={e => handle.edit(e)}
+                        onBlur={e => handle.edit(e)}
+                        defaultValue={task.title}
                     />
                 )}
         </li>
